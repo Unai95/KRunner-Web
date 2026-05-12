@@ -3,7 +3,7 @@ import cors from 'cors';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runKotlin } from './runner.js';
+import { diagnoseRunner, runKotlin } from './runner.js';
 import { validatePayload } from './validation.js';
 
 const app = express();
@@ -33,6 +33,15 @@ app.post('/run', async (req, res) => {
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', version: '0.1.0' });
+});
+
+app.get('/runner-diagnostics', async (_req, res) => {
+  try {
+    res.json(await diagnoseRunner());
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: message });
+  }
 });
 
 if (existsSync(DIST_DIR)) {

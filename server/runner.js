@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { mkdtemp, writeFile, rm, access } from 'node:fs/promises';
+import { mkdtemp, writeFile, rm, access, stat } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -44,6 +44,41 @@ function execFileText(command, args, options) {
       resolve(stdout);
     });
   });
+}
+
+function execFileResult(command, args, options = {}) {
+  return new Promise((resolve) => {
+    execFile(command, args, { ...options, windowsHide: true, maxBuffer: 1024 * 1024 * 4 }, (error, stdout, stderr) => {
+      resolve({
+        ok: !error,
+        code: error?.code ?? 0,
+        signal: error?.signal ?? null,
+        message: error?.message ?? '',
+        stdout,
+        stderr,
+      });
+    });
+  });
+}
+
+export async function diagnoseRunner() {
+  const jarPath = await findRunnerJar();
+  const jarInfo = await stat(jarPath);
+  const javaVersion = await execFileResult('java', ['-version']);
+  const javacVersion = await execFileResult('javac', ['-version']);
+  const jarManifest = await execFileResult('jar', ['tf', jarPath], { timeout: 5000 });
+  const runnerUsage = await execFileResult('java', ['-jar', jarPath], { timeout: 5000 });
+
+  return {
+    serverDir: SERVER_DIR,
+    jarPath,
+    jarBytes: jarInfo.size,
+    javaVersion,
+    javacVersion,
+    jarHasManifest: jarManifest.stdout.includes('META-INF/MANIFEST.MF'),
+    jarHasMainClass: jarManifest.stdout.includes('local/kotlinrunner/KotlinLocalRunner.class'),
+    runnerUsage,
+  };
 }
 
 export async function runKotlin(payload) {
