@@ -1,0 +1,65 @@
+{
+  "name": "krunner",
+  "version": "0.1.6",
+  "description": "Desktop app for practicing Kotlin exercises with local execution and test cases.",
+  "author": "KRunner",
+  "private": true,
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite",
+    "desktop": "electron .",
+    "server": "node server/server.js",
+    "start": "vite --host 127.0.0.1",
+    "build:runner": "mvn -q -f runner/pom.xml package",
+    "build": "vite build",
+    "check": "vite build",
+    "test": "node --test \"src/**/*.test.js\"",
+    "pack": "npm run build:runner && npm run build && electron-builder --dir",
+    "dist": "npm run build:runner && npm run build && electron-builder --win nsis"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.8.0",
+    "vite": "^7.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "electron": "^42.0.1",
+    "electron-builder": "^26.8.1",
+    "monaco-editor": "^0.53.0"
+  },
+  "build": {
+    "appId": "com.local.krunner",
+    "productName": "KRunner",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "runner/target/kotlin-local-runner-0.1.0.jar",
+        "to": "runner/kotlin-local-runner-0.1.0.jar"
+      }
+    ],
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
