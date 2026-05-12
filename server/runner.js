@@ -28,12 +28,17 @@ function execFileText(command, args, options) {
   return new Promise((resolve, reject) => {
     execFile(command, args, { ...options, windowsHide: true, maxBuffer: 1024 * 1024 * 4 }, (error, stdout, stderr) => {
       if (error) {
+        if (stdout?.trim().startsWith('{')) {
+          resolve(stdout);
+          return;
+        }
         const message = stderr || error.message;
         if (/ENOENT|not recognized|not found/i.test(message)) {
           reject(new Error('ENVIRONMENT: No se encontro Java en el sistema.'));
           return;
         }
-        reject(new Error(`RUNNER: ${message}`));
+        const details = [message, stdout && `STDOUT:\n${stdout}`, stderr && `STDERR:\n${stderr}`].filter(Boolean).join('\n\n');
+        reject(new Error(`RUNNER: ${details}`));
         return;
       }
       resolve(stdout);

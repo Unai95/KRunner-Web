@@ -57,6 +57,8 @@ El Dockerfile compila durante el despliegue:
 - El frontend Vite en `dist`.
 - El servidor Express con Node 20.
 
+La imagen final usa JDK 21 completo. No cambies a JRE: el runner invoca el compilador Kotlin embebido y necesita clases del JDK.
+
 Pasos:
 
 1. Sube este proyecto a un repositorio GitHub.
@@ -73,6 +75,8 @@ Debe devolver:
 ```json
 { "status": "ok", "version": "0.1.0" }
 ```
+
+Si Railway sigue mostrando un error antiguo despues de subir cambios, ejecuta un redeploy manual de la ultima version o limpia la cache de build desde Railway.
 
 La API de ejecucion queda en:
 

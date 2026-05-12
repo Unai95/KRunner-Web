@@ -15,9 +15,10 @@ COPY src src
 COPY assets assets
 RUN npm run build
 
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:21-jdk-jammy
 
 # Instalar Node 20 para ejecutar el servidor Express.
+# El runner necesita JDK, no solo JRE, porque usa el compilador Kotlin embebido.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl ca-certificates gnupg && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
